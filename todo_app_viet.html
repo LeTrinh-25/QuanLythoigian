@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow - Quản lý công việc</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-screen show" id="loginScreen">
+  <div class="login-card">
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="login-logo">
+        <p>✅</p>
+        <h2>TaskFlow — đăng nhập</h2>
+      </div>
+      <div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="you@email.com" value="demo@taskflow.vn"></div>
+      <div class="form-group"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="••••••••" value="12345678"></div>
+      <button class="btn-add" style="width:100%;justify-content:center;padding:.65rem" onclick="doLogin()">Đăng nhập</button>
+      <p style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin-top:1rem">Chưa có tài khoản? <a href="#" onclick="toggleSignup(event)" style="color:#6c63ff;text-decoration:none;font-weight:500">Đăng ký ngay</a></p>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none;">
+      <div class="login-logo">
+        <p>✅</p>
+        <h2>TaskFlow — đăng ký</h2>
+      </div>
+      <div class="form-group"><label>Tên đầy đủ</label><input id="signupName" type="text" placeholder="Nhập tên của bạn"></div>
+      <div class="form-group"><label>Email</label><input id="signupEmail" type="email" placeholder="you@email.com"></div>
+      <div class="form-group"><label>Mật khẩu</label><input id="signupPass" type="password" placeholder="Ít nhất 6 ký tự"></div>
+      <div class="form-group"><label>Xác nhận mật khẩu</label><input id="signupPassConfirm" type="password" placeholder="Nhập lại mật khẩu"></div>
+      <button class="btn-add" style="width:100%;justify-content:center;padding:.65rem" onclick="doSignup()">Đăng ký</button>
+      <p style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin-top:1rem">Đã có tài khoản? <a href="#" onclick="toggleSignup(event)" style="color:#6c63ff;text-decoration:none;font-weight:500">Đăng nhập</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="app hidden" id="appMain">
+  <div class="sidebar">
+    <div class="logo"><span>✅</span> TaskFlow</div>
+    <div class="user-card">
+      <div class="avatar" id="sideAvatar">DM</div>
+      <div class="user-info"><p id="sideUser">Demo User</p><p id="sideEmail">demo@taskflow.vn</p></div>
+    </div>
+    <div>
+      <p class="nav-label">Xem theo</p>
+      <button class="nav-btn active" id="navAll" onclick="setFilter('all',this)"><span>📋</span> Tất cả<span class="badge" id="badgeAll">0</span></button>
+      <button class="nav-btn" id="navToday" onclick="setFilter('today',this)"><span>📅</span> Hôm nay<span class="badge" id="badgeToday">0</span></button>
+      <button class="nav-btn" id="navPending" onclick="setFilter('pending',this)"><span>⏳</span> Đang làm<span class="badge" id="badgePending">0</span></button>
+      <button class="nav-btn" id="navDone" onclick="setFilter('done',this)"><span>✔️</span> Xong<span class="badge" id="badgeDone">0</span></button>
+    </div>
+    <div>
+      <p class="nav-label">Danh mục</p>
+      <button class="nav-btn" onclick="setFilter('work',this)"><span class="cat-dot" style="background:#3b82f6"></span> Work<span class="badge" id="badgeWork">0</span></button>
+      <button class="nav-btn" onclick="setFilter('study',this)"><span class="cat-dot" style="background:#a855f7"></span> Study<span class="badge" id="badgeStudy">0</span></button>
+      <button class="nav-btn" onclick="setFilter('personal',this)"><span class="cat-dot" style="background:#22c55e"></span> Personal<span class="badge" id="badgePersonal">0</span></button>
+    </div>
+    <div style="margin-top:auto">
+      <button class="nav-btn" id="adminBtn" onclick="toggleAdminMode()" style="display:none"><span>⚙️</span> Admin</button>
+      <button class="nav-btn" onclick="doLogout()"><span>🚪</span> Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="main" id="userContent">
+    <div class="topbar">
+      <h1 id="topTitle">Tất cả công việc</h1>
+      <div class="view-tabs">
+        <button class="vtab active" onclick="setView('kanban',this)">Kanban</button>
+        <button class="vtab" onclick="setView('list',this)">Danh sách</button>
+      </div>
+      <button class="btn-add" onclick="openModal()">+ Thêm việc</button>
+    </div>
+
+    <div class="content">
+      <div class="stats">
+        <div class="stat"><p>Tổng việc</p><p id="sTotal">0</p></div>
+        <div class="stat"><p>Hoàn thành</p><p id="sDone">0</p></div>
+        <div class="stat"><p>Tiến độ</p><p id="sProg">0%</p><div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div></div>
+      </div>
+
+      <div class="filter-bar" id="filterBar">
+        <span style="font-size:12px;color:var(--color-text-secondary)">Lọc:</span>
+        <button class="filter-chip active" onclick="setCatFilter('all',this)">Tất cả</button>
+        <button class="filter-chip" onclick="setCatFilter('work',this)">Work</button>
+        <button class="filter-chip" onclick="setCatFilter('study',this)">Study</button>
+        <button class="filter-chip" onclick="setCatFilter('personal',this)">Personal</button>
+      </div>
+
+      <div class="kanban" id="kanbanView">
+        <div class="col" id="col-pending" ondragover="onDragOver(event,'pending')" ondrop="onDrop(event,'pending')" ondragleave="onDragLeave(event)">
+          <div class="col-header"><div class="col-dot" style="background:#f59e0b"></div><h3>Đang làm</h3><span class="col-count" id="cnt-pending">0</span></div>
+          <div id="cards-pending"></div>
+        </div>
+        <div class="col" id="col-inprogress" ondragover="onDragOver(event,'inprogress')" ondrop="onDrop(event,'inprogress')" ondragleave="onDragLeave(event)">
+          <div class="col-header"><div class="col-dot" style="background:#6c63ff"></div><h3>Đang xử lý</h3><span class="col-count" id="cnt-inprogress">0</span></div>
+          <div id="cards-inprogress"></div>
+        </div>
+        <div class="col" id="col-done" ondragover="onDragOver(event,'done')" ondrop="onDrop(event,'done')" ondragleave="onDragLeave(event)">
+          <div class="col-header"><div class="col-dot" style="background:#22c55e"></div><h3>Hoàn thành</h3><span class="col-count" id="cnt-done">0</span></div>
+          <div id="cards-done"></div>
+        </div>
+      </div>
+
+      <div class="list-view" id="listView"></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div class="admin-panel" id="adminPanel" style="display:none">
+    <div class="admin-header">
+      <h2>🔧 Admin Dashboard</h2>
+      <p style="font-size:12px;color:var(--color-text-secondary)">Quản lý người dùng và công việc</p>
+    </div>
+
+    <div class="admin-content">
+      <div class="admin-section">
+        <h3>📊 Thống kê</h3>
+        <div class="stats" id="adminStats"></div>
+      </div>
+
+      <div class="admin-section">
+        <h3>👥 Danh sách User</h3>
+        <div id="adminUsersList" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <div class="admin-section">
+        <h3>📋 Task gần đây</h3>
+        <div id="adminTasksList" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h2 id="modalTitle">Thêm công việc mới</h2>
+    <div class="form-group"><label>Tên công việc *</label><input id="taskTitle" placeholder="VD: Làm báo cáo tuần..."></div>
+    <div class="form-row">
+      <div class="form-group"><label>Danh mục</label>
+        <select id="taskCat"><option value="work">Work</option><option value="study">Study</option><option value="personal">Personal</option></select>
+      </div>
+      <div class="form-group"><label>Trạng thái</label>
+        <select id="taskStatus"><option value="pending">Đang làm</option><option value="inprogress">Đang xử lý</option><option value="done">Hoàn thành</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Deadline</label><input type="date" id="taskDeadline"></div>
+      <div class="form-group"><label>Nhắc việc</label><input type="time" id="taskRemind" placeholder="HH:MM"></div>
+    </div>
+    <div class="form-group"><label>Ghi chú</label><textarea id="taskNote" rows="2" placeholder="Thêm ghi chú..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Huỷ</button>
+      <button class="btn-save" onclick="saveTask()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<button class="notify-dot" id="notifyBtn" onclick="dismissNotify()">🔔 Nhắc nhở: <span id="notifyText"></span></button>
+
+  <script src="script.js"></script>
+</body>
+</html>
